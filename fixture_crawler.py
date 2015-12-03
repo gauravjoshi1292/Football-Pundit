@@ -5,17 +5,18 @@ from web_browser import WebBrowser
 from selenium.webdriver.common.keys import Keys
 from selenium.common.exceptions import TimeoutException
 
-from utils import normalize, dump_as_json
+from utils import normalize, get_control_key, dump_as_json
 
 
 class FixtureCrawler(object):
     def __init__(self, uri):
         self.browser = WebBrowser(uri)
         self.match_reports = {'reports': []}
+        self.timeout = 180
 
     def browse_monthly_fixtures(self):
         try:
-            self.browser.wait_till_element_is_loaded("a[class='match-link match-report rc']", 60)
+            self.browser.wait_till_element_is_loaded("a[class='match-link match-report rc']", 5)
             elements = self.browser.find_elements_by_css_selector("a[class='match-link match-report rc']")
             self.analyze_match_report()
 
@@ -26,22 +27,23 @@ class FixtureCrawler(object):
             self.browser.quit()
 
     def browse_previous_fixtures(self):
-        self.browser.wait_till_element_is_loaded("span.ui-icon.ui-icon-triangle-1-w", 60)
+        self.browser.wait_till_element_is_loaded("span.ui-icon.ui-icon-triangle-1-w", self.timeout)
 
         elem = self.browser.find_element_by_css_selector("span.ui-icon.ui-icon-triangle-1-w")
         self.browser.click_element(elem)
 
-        self.browser.wait_till_element_is_loaded("a[class='match-link match-report rc']", 60)
+        self.browser.wait_till_element_is_loaded("a[class='match-link match-report rc']", self.timeout)
 
         elements = self.browser.find_elements_by_css_selector("a[class='match-link match-report rc']")
         self.browse_match_reports(elements)
 
         month = normalize(self.browser.find_element_by_css_selector("a[id='date-config-toggle-button']").text)
         print month
-        if month != "Aug 6015":
+        if month != "Aug 2015":
             self.browse_previous_fixtures()
 
     def browse_match_reports(self, elements):
+        CONTROL_KEY = get_control_key()
         for elem in elements:
             # Save the window opener (current window, do not mistaken with tab... not the same)
             main_window = self.browser.current_window_handle()
@@ -52,7 +54,7 @@ class FixtureCrawler(object):
             self.browser.open_link_in_new_tab(elem)
 
             # Switch tab to the new tab, which we will assume is the next one on the right
-            self.browser.find_element_by_tag_name('body').send_keys(Keys.CONTROL + Keys.TAB)
+            self.browser.find_element_by_tag_name('body').send_keys(CONTROL_KEY + Keys.TAB)
 
             # Put focus on current window which will, in fact, put focus on the current visible tab
             self.browser.switch_to_window(main_window)
@@ -61,13 +63,13 @@ class FixtureCrawler(object):
             self.analyze_match_report()
 
             # Close current tab
-            self.browser.find_element_by_tag_name('body').send_keys(Keys.CONTROL + 'w')
+            self.browser.find_element_by_tag_name('body').send_keys(CONTROL_KEY + 'w')
 
             # Put focus on current window which will be the window opener
             self.browser.switch_to_window(main_window)
 
     def analyze_match_report(self):
-        self.browser.wait_till_element_is_loaded("div[id='match-header']", 60)
+        self.browser.wait_till_element_is_loaded("div[id='match-header']", self.timeout)
         match_header_elem = self.browser.find_element_by_css_selector("div[id='match-header']")
         team_elements = match_header_elem.find_elements_by_css_selector("td[class='team']")
         home_team, away_team = normalize(team_elements[0].text), normalize(team_elements[1].text)
@@ -78,13 +80,13 @@ class FixtureCrawler(object):
         kickoff = normalize(kickoff_elements[-2].text)
         print '\n\n', home_team, away_team, home_goals, away_goals, kickoff, date
 
-        self.browser.wait_till_element_is_loaded("div[id='sub-navigation']", 60)
+        self.browser.wait_till_element_is_loaded("div[id='sub-navigation']", self.timeout)
         div_elem = self.browser.find_element_by_css_selector("div[id='sub-navigation']")
         li_elem = div_elem.find_element_by_css_selector("li")
         preview_elem = li_elem.find_element_by_css_selector("a")
         self.browser.click_element(preview_elem)
 
-        self.browser.wait_till_element_is_loaded("div[class='stat-group']", 60)
+        self.browser.wait_till_element_is_loaded("div[class='stat-group']", self.timeout)
         # print self.browser.get_soup()
         # print '\n\n\n'
 
@@ -111,7 +113,7 @@ class FixtureCrawler(object):
         match_report['away_team_height'] = away_team_height
 
         self.match_reports['reports'].append(match_report)
-
+    
     def persist_reports(self):
         dump_as_json(self.match_reports, 'data.json')
 

@@ -3,12 +3,11 @@ __author__ = 'gj1292'
 import time
 from bs4 import BeautifulSoup
 from selenium.webdriver.support.ui import WebDriverWait
-from selenium.webdriver.common.keys import Keys
 from selenium.webdriver.common.action_chains import ActionChains
 from selenium.webdriver.common.by import By
 from selenium.webdriver.support import expected_conditions as EC
 
-from utils import get_driver
+from utils import get_driver, get_control_key
 
 
 class WebBrowser(object):
@@ -90,11 +89,12 @@ class WebBrowser(object):
         actions.perform()
 
     def open_link_in_new_tab(self, elem):
+        CONTROL_KEY = get_control_key()
         actions = ActionChains(self.driver)
         actions.move_to_element(elem)
-        actions.key_down(Keys.CONTROL)
+        actions.key_down(CONTROL_KEY)
         actions.click(elem)
-        actions.key_up(Keys.CONTROL)
+        actions.key_up(CONTROL_KEY)
         actions.perform()
 
     def switch_to_window(self, new_window):
@@ -105,7 +105,6 @@ class WebBrowser(object):
 
     def wait_till_element_is_loaded(self, selector, timeout):
         WebDriverWait(self.driver, timeout).until(EC.presence_of_all_elements_located((By.CSS_SELECTOR, selector)))
-        # lambda browser: self.find_element_by_css_selector(selector)
 
     def quit(self):
         self.driver.quit()

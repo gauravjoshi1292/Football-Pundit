@@ -4,10 +4,37 @@ import json
 import socket
 import urllib2
 import unicodedata
+from sys import platform
 from bson import json_util
 from bs4 import BeautifulSoup
 from selenium import webdriver
+from selenium.webdriver.common.keys import Keys
 from selenium.common.exceptions import WebDriverException
+
+
+def system_platform():
+    """
+    Returns system platform
+
+    :rtype: str
+    """
+    if platform == "linux" or platform == "linux2":
+        return "Linux"
+    elif platform == "darwin":
+        return "OS X"
+    elif platform == "win32":
+        return "Windows"
+
+
+def get_control_key():
+    """
+
+    :return:
+    """
+    if system_platform() == "OS X":
+        return Keys.COMMAND
+    else:
+        return Keys.CONTROL
 
 
 def normalize(text):
