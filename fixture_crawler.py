@@ -5,14 +5,17 @@ from web_browser import WebBrowser
 from selenium.webdriver.common.keys import Keys
 from selenium.common.exceptions import TimeoutException
 
+from utils import normalize, dump_as_json
+
 
 class FixtureCrawler(object):
     def __init__(self, uri):
         self.browser = WebBrowser(uri)
+        self.match_reports = {'reports': []}
 
     def browse_monthly_fixtures(self):
         try:
-            self.browser.wait_till_element_is_loaded("a[class='match-link match-report rc']", 3)
+            self.browser.wait_till_element_is_loaded("a[class='match-link match-report rc']", 60)
             elements = self.browser.find_elements_by_css_selector("a[class='match-link match-report rc']")
             self.analyze_match_report()
 
@@ -23,19 +26,19 @@ class FixtureCrawler(object):
             self.browser.quit()
 
     def browse_previous_fixtures(self):
-        self.browser.wait_till_element_is_loaded("span.ui-icon.ui-icon-triangle-1-w", 3)
+        self.browser.wait_till_element_is_loaded("span.ui-icon.ui-icon-triangle-1-w", 60)
 
         elem = self.browser.find_element_by_css_selector("span.ui-icon.ui-icon-triangle-1-w")
         self.browser.click_element(elem)
 
-        self.browser.wait_till_element_is_loaded("a[class='match-link match-report rc']", 3)
+        self.browser.wait_till_element_is_loaded("a[class='match-link match-report rc']", 60)
 
         elements = self.browser.find_elements_by_css_selector("a[class='match-link match-report rc']")
         self.browse_match_reports(elements)
 
-        month = self.browser.find_element_by_css_selector("a[id='date-config-toggle-button']").text
+        month = normalize(self.browser.find_element_by_css_selector("a[id='date-config-toggle-button']").text)
         print month
-        if month != "Aug 2015":
+        if month != "Aug 6015":
             self.browse_previous_fixtures()
 
     def browse_match_reports(self, elements):
@@ -63,14 +66,55 @@ class FixtureCrawler(object):
             # Put focus on current window which will be the window opener
             self.browser.switch_to_window(main_window)
 
-            break
-
     def analyze_match_report(self):
-        source = self.browser.get_soup()
-        div_elem = self.browser.find_element_by_css_selector("div[id='sub-navigation]")
+        self.browser.wait_till_element_is_loaded("div[id='match-header']", 60)
+        match_header_elem = self.browser.find_element_by_css_selector("div[id='match-header']")
+        team_elements = match_header_elem.find_elements_by_css_selector("td[class='team']")
+        home_team, away_team = normalize(team_elements[0].text), normalize(team_elements[1].text)
+        result_elem = match_header_elem.find_element_by_css_selector("td[class='result']")
+        home_goals, away_goals = map(int, normalize(result_elem.text).split(':'))
+        kickoff_elements = match_header_elem.find_elements_by_css_selector("dd")
+        date = normalize(kickoff_elements[-1].text)
+        kickoff = normalize(kickoff_elements[-2].text)
+        print '\n\n', home_team, away_team, home_goals, away_goals, kickoff, date
+
+        self.browser.wait_till_element_is_loaded("div[id='sub-navigation']", 60)
+        div_elem = self.browser.find_element_by_css_selector("div[id='sub-navigation']")
         li_elem = div_elem.find_element_by_css_selector("li")
         preview_elem = li_elem.find_element_by_css_selector("a")
         self.browser.click_element(preview_elem)
+
+        self.browser.wait_till_element_is_loaded("div[class='stat-group']", 60)
+        # print self.browser.get_soup()
+        # print '\n\n\n'
+
+        stat_group_elements = self.browser.find_elements_by_css_selector("div[class='stat-group']")
+        print stat_group_elements
+        stat_group_elem = stat_group_elements[1]
+        stat_elements = stat_group_elem.find_elements_by_css_selector("div[class='stat']")
+        print stat_elements
+        height_elem = stat_elements[-1]
+        height_val_elements = height_elem.find_elements_by_css_selector("span[class='stat-value']")
+        print height_val_elements
+        print '\n\n', height_val_elements[0].text, height_val_elements[-1].text
+        home_team_height = float(normalize(height_val_elements[0].text))
+        away_team_height = float(normalize(height_val_elements[-1].text))
+
+        match_report = dict()
+        match_report['date'] = date
+        match_report['kickoff'] = kickoff
+        match_report['home_team'] = home_team
+        match_report['away_team'] = away_team
+        match_report['home_goals'] = home_goals
+        match_report['away_goals'] = away_goals
+        match_report['home_team_height'] = home_team_height
+        match_report['away_team_height'] = away_team_height
+
+        self.match_reports['reports'].append(match_report)
+
+    def persist_reports(self):
+        dump_as_json(self.match_reports, 'data.json')
+
 
 f = FixtureCrawler(FIXTURE_URL)
 f.browse_monthly_fixtures()
