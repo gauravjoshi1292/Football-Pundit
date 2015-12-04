@@ -161,15 +161,17 @@ def get_table_from_url(url, table_class):
     return tds
 
 
-def dump_as_json(data, json_file):
+def dump_as_json(data, json_file, mode):
     """
     Dumps the data into a json file
 
     :type data: dict
 
+    :type mode: str
+
     :type json_file: str
     """
-    with open(json_file, "w") as outfile:
+    with open(json_file, mode) as outfile:
         json.dump(data, outfile, indent=4, default=json_util.default)
 
 
