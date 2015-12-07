@@ -13,12 +13,12 @@ class FixtureCrawler(object):
         self.browser = WebBrowser(uri)
         self.match_reports = {'reports': []}
         self.timeout = 300
-        self.skip = 5
+        self.skip = 0
         self.batch_size = 5
 
     def browse_monthly_fixtures(self):
         try:
-            self.browser.wait_till_element_is_loaded("a[class='match-link match-report rc']", 5)
+            self.browser.wait_till_element_is_loaded("a[class='match-link match-report rc']", self.timeout)
             elements = self.browser.find_elements_by_css_selector("a[class='match-link match-report rc']")
             self.browse_match_reports(elements)
 
@@ -112,8 +112,8 @@ class FixtureCrawler(object):
                 'away_team_height': away_team_height}
 
     def analyze_match_report(self):
-        match_result = self.get_match_result()
         self.go_to_match_preview()
+        match_result = self.get_match_result()
         height_stats = self.get_height_stats()
 
         match_report = dict()
@@ -131,7 +131,7 @@ class FixtureCrawler(object):
         dump_as_json(self.match_reports, 'data.json', 'w')
 
 
-for i in range(28):
+for i in range(29):
     f = FixtureCrawler(FIXTURE_URL)
     f.browse_monthly_fixtures()
     f.persist_reports()
