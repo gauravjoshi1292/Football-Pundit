@@ -1,19 +1,20 @@
 __author__ = 'gj1292'
 
-from urls import FIXTURE_URL
-from web_browser import WebBrowser
+import time
 from selenium.webdriver.common.keys import Keys
 from selenium.common.exceptions import TimeoutException
 
+from urls import FIXTURE_URL
+from web_browser import WebBrowser
 from utils import normalize, get_control_key, dump_as_json, load_as_json
 
 
 class FixtureCrawler(object):
-    def __init__(self, uri):
+    def __init__(self, uri, skip):
         self.browser = WebBrowser(uri)
         self.match_reports = {'reports': []}
         self.timeout = 300
-        self.skip = 0
+        self.skip = skip
         self.batch_size = 5
 
     def browse_monthly_fixtures(self):
@@ -23,9 +24,11 @@ class FixtureCrawler(object):
             self.browse_match_reports(elements)
 
         except TimeoutException:
-            f.browse_previous_fixtures()
+            pass
 
         finally:
+            print "Called from finally"
+            f.browse_previous_fixtures()
             self.browser.quit()
 
     def browse_previous_fixtures(self):
@@ -36,7 +39,10 @@ class FixtureCrawler(object):
 
         self.browser.wait_till_element_is_loaded("a[class='match-link match-report rc']", self.timeout)
 
+        time.sleep(5)
+
         elements = self.browser.find_elements_by_css_selector("a[class='match-link match-report rc']")
+        print elements
         self.browse_match_reports(elements)
 
         month = normalize(self.browser.find_element_by_css_selector("a[id='date-config-toggle-button']").text)
@@ -46,6 +52,7 @@ class FixtureCrawler(object):
     def browse_match_reports(self, elements):
         CONTROL_KEY = get_control_key()
         for elem in elements:
+            print "skip:", self.skip
             if self.batch_size == 0:
                 break
 
@@ -60,6 +67,7 @@ class FixtureCrawler(object):
             # Use: Keys.CONTROL + Keys.SHIFT + Keys.RETURN to open tab on top of the stack
             # first_link.send_keys(Keys.CONTROL + Keys.RETURN)
             self.browser.open_link_in_new_tab(elem)
+            time.sleep(10)
 
             # Switch tab to the new tab, which we will assume is the next one on the right
             self.browser.find_element_by_tag_name('body').send_keys(CONTROL_KEY + Keys.TAB)
@@ -97,6 +105,7 @@ class FixtureCrawler(object):
         li_elem = div_elem.find_element_by_css_selector("li")
         preview_elem = li_elem.find_element_by_css_selector("a")
         self.browser.click_element(preview_elem)
+        time.sleep(10)
 
     def get_height_stats(self):
         self.browser.wait_till_element_is_loaded("div[class='stat-group']", self.timeout)
@@ -126,12 +135,14 @@ class FixtureCrawler(object):
         try:
             reports = load_as_json('data.json')
         except ValueError:
-            reports = dict()
-        reports.update(self.match_reports)
-        dump_as_json(self.match_reports, 'data.json', 'w')
+            reports = {'reports': []}
 
+        reports['reports'].extend(self.match_reports['reports'])
+        dump_as_json(reports, 'data.json', 'w')
 
+skip = 10
 for i in range(29):
-    f = FixtureCrawler(FIXTURE_URL)
+    f = FixtureCrawler(FIXTURE_URL, skip)
     f.browse_monthly_fixtures()
     f.persist_reports()
+    skip += 5

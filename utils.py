@@ -70,68 +70,52 @@ def get_soup_from_url(url):
     return soup
 
 
-def get_chrome_driver(url):
+def get_chrome_driver():
     """
     Returns a selenium chrome driver
-
-    :param url: page url
-    :type url: str
-
 
     :rtype: selenium.webdriver.chrome.webdriver.WebDriver
     """
     driver = webdriver.Chrome()
-    driver.get(url)
     return driver
 
 
-def get_firefox_driver(url):
+def get_firefox_driver():
     """
     Returns a selenium firefox driver
-
-    :param url: page ur;
-    :type url: str
 
     :rtype: selenium.webdriver.firefox.webdriver.WebDriver
     """
     driver = webdriver.Firefox()
-    driver.get(url)
     return driver
 
 
-def get_safari_driver(url):
+def get_safari_driver():
     """
     Returns a selenium safari driver
-
-    :param url: page url
-    :type url: str
 
     :rtype: selenium.webdriver.safari.webdriver.WebDriver
     """
     driver = webdriver.Safari()
-    driver.get(url)
     return driver
 
 
-def get_driver(url):
+def get_driver():
     """
     Return a selenium webdriver depending upon what's available on the system
-
-    :param url: page url
-    :type url: str
 
     :rtype: selenium.webdriver.chrome.webdriver.WebDriver |
             selenium.webdriver.firefox.webdriver.WebDriver |
             selenium.webdriver.safari.webdriver.WebDriver
     """
     try:
-        driver = get_chrome_driver(url)
+        driver = get_chrome_driver()
     except WebDriverException:
         try:
-            driver = get_firefox_driver(url)
+            driver = get_firefox_driver()
         except WebDriverException:
             try:
-                driver = get_safari_driver(url)
+                driver = get_safari_driver()
             except WebDriverException:
                 print "Could not find selenium web driver on system! Quit!"
                 return
