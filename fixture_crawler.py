@@ -10,28 +10,43 @@ from utils import normalize, get_control_key, dump_as_json, load_as_json
 
 
 class FixtureCrawler(object):
-    def __init__(self, uri, skip):
+    def __init__(self, uri, skip, batch):
         self.browser = WebBrowser(uri)
         self.match_reports = {'reports': []}
         self.timeout = 300
         self.skip = skip
-        self.batch_size = 5
+        self.batch_size = batch
+
+    def skip_elements(self, elements):
+        size = len(elements)
+        skip = self.skip
+
+        if size < self.skip:
+            self.skip -= size
+        else:
+            self.skip = 0
+
+        culled_elements = elements[skip:]
+        return culled_elements
 
     def browse_monthly_fixtures(self):
         try:
             self.browser.wait_till_element_is_loaded("a[class='match-link match-report rc']", self.timeout)
             elements = self.browser.find_elements_by_css_selector("a[class='match-link match-report rc']")
-            self.browse_match_reports(elements)
+            culled_elements = self.skip_elements(elements)
+            self.browse_match_reports(culled_elements)
 
         except TimeoutException:
             pass
 
         finally:
-            print "Called from finally"
             f.browse_previous_fixtures()
             self.browser.quit()
 
     def browse_previous_fixtures(self):
+        if self.batch_size == 0:
+            return
+
         self.browser.wait_till_element_is_loaded("span.ui-icon.ui-icon-triangle-1-w", self.timeout)
 
         elem = self.browser.find_element_by_css_selector("span.ui-icon.ui-icon-triangle-1-w")
@@ -42,8 +57,8 @@ class FixtureCrawler(object):
         time.sleep(5)
 
         elements = self.browser.find_elements_by_css_selector("a[class='match-link match-report rc']")
-        print elements
-        self.browse_match_reports(elements)
+        culled_elements = self.skip_elements(elements)
+        self.browse_match_reports(culled_elements)
 
         month = normalize(self.browser.find_element_by_css_selector("a[id='date-config-toggle-button']").text)
         if month != "Aug 2015":
@@ -52,7 +67,6 @@ class FixtureCrawler(object):
     def browse_match_reports(self, elements):
         CONTROL_KEY = get_control_key()
         for elem in elements:
-            print "skip:", self.skip
             if self.batch_size == 0:
                 break
 
@@ -67,10 +81,10 @@ class FixtureCrawler(object):
             # Use: Keys.CONTROL + Keys.SHIFT + Keys.RETURN to open tab on top of the stack
             # first_link.send_keys(Keys.CONTROL + Keys.RETURN)
             self.browser.open_link_in_new_tab(elem)
-            time.sleep(10)
+            time.sleep(5)
 
             # Switch tab to the new tab, which we will assume is the next one on the right
-            self.browser.find_element_by_tag_name('body').send_keys(CONTROL_KEY + Keys.TAB)
+            self.browser.find_element_by_tag_name('body').send_keys(Keys.CONTROL + Keys.TAB)
 
             # Put focus on current window which will, in fact, put focus on the current visible tab
             self.browser.switch_to_window(main_window)
@@ -105,7 +119,7 @@ class FixtureCrawler(object):
         li_elem = div_elem.find_element_by_css_selector("li")
         preview_elem = li_elem.find_element_by_css_selector("a")
         self.browser.click_element(preview_elem)
-        time.sleep(10)
+        time.sleep(3)
 
     def get_height_stats(self):
         self.browser.wait_till_element_is_loaded("div[class='stat-group']", self.timeout)
@@ -133,16 +147,17 @@ class FixtureCrawler(object):
     
     def persist_reports(self):
         try:
-            reports = load_as_json('data.json')
+            reports = load_as_json('data1.json')
         except ValueError:
             reports = {'reports': []}
 
         reports['reports'].extend(self.match_reports['reports'])
-        dump_as_json(reports, 'data.json', 'w')
+        dump_as_json(reports, 'data1.json', 'w')
 
-skip = 10
-for i in range(29):
-    f = FixtureCrawler(FIXTURE_URL, skip)
+skip = 50
+batch = 10
+for i in range(15):
+    f = FixtureCrawler(FIXTURE_URL, skip, batch)
     f.browse_monthly_fixtures()
     f.persist_reports()
-    skip += 5
+    skip += 10

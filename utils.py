@@ -109,10 +109,10 @@ def get_driver():
             selenium.webdriver.safari.webdriver.WebDriver
     """
     try:
-        driver = get_chrome_driver()
+        driver = get_firefox_driver()
     except WebDriverException:
         try:
-            driver = get_firefox_driver()
+            driver = get_chrome_driver()
         except WebDriverException:
             try:
                 driver = get_safari_driver()
