@@ -154,10 +154,14 @@ class FixtureCrawler(object):
 
     def get_match_result(self):
         """
+        Returns a dict containing information on match result
 
-        :return:
+        :rtype:
         """
+        # Wait till match header is loaded
         self.browser.wait_till_element_is_loaded("div[id='match-header']", self.timeout)
+
+        # Extract match result from html source
         match_header_elem = self.browser.find_element_by_css_selector("div[id='match-header']")
         team_elements = match_header_elem.find_elements_by_css_selector("td[class='team']")
         home_team, away_team = normalize(team_elements[0].text), normalize(team_elements[1].text)
@@ -171,22 +175,32 @@ class FixtureCrawler(object):
 
     def go_to_match_preview(self):
         """
-
-        :return:
+        Navigates to match preview
         """
+        # Wait till navigation menu is active on page
         self.browser.wait_till_element_is_loaded("div[id='sub-navigation']", self.timeout)
+
+        # Extract preview element from match source
         div_elem = self.browser.find_element_by_css_selector("div[id='sub-navigation']")
         li_elem = div_elem.find_element_by_css_selector("li")
         preview_elem = li_elem.find_element_by_css_selector("a")
+
+        # Click on preview element
         self.browser.click_element(preview_elem)
+
+        # Sleep for 3s
         time.sleep(3)
 
     def get_height_stats(self):
         """
+        Returns height info for both teams
 
-        :return:
+        :rtype:
         """
+        # Wait till element is active
         self.browser.wait_till_element_is_loaded("div[class='stat-group']", self.timeout)
+
+        # Extract height info from html source
         stat_group_elements = self.browser.find_elements_by_css_selector("div[class='stat-group']")
         stat_group_elem = stat_group_elements[1]
         stat_elements = stat_group_elem.find_elements_by_css_selector("div[class='stat']")
