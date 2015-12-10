@@ -12,8 +12,10 @@ from utils import get_driver, get_control_key
 
 
 class WebBrowser(object):
-    def __init__(self, url):
+    def __init__(self):
         self.driver = get_driver()
+
+    def get(self, url):
         self.driver.get(url)
 
     def scroll_to_bottom(self):

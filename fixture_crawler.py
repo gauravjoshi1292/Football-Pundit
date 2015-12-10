@@ -4,20 +4,37 @@ import time
 from selenium.webdriver.common.keys import Keys
 from selenium.common.exceptions import TimeoutException
 
-from urls import FIXTURE_URL
 from web_browser import WebBrowser
+from exception import ForbiddenAccessError
 from utils import normalize, get_control_key, dump_as_json, load_as_json
 
 
 class FixtureCrawler(object):
-    def __init__(self, uri, skip, batch):
-        self.browser = WebBrowser(uri)
+    def __init__(self, url, skip, batch):
+        self.browser = WebBrowser()
+        self.browser.get(url)
+
+        # Check for forbidden access
+        server_response = normalize(self.browser.find_element_by_css_selector("div[id='header']").text)
+        print server_response
+        if server_response == "Server Error":
+            self.browser.quit()
+            raise ForbiddenAccessError
+
         self.match_reports = {'reports': []}
-        self.timeout = 300
-        self.skip = skip
-        self.batch_size = batch
+        self.timeout = 300  # Wait for 300s for elements to load on the page
+        self.skip = skip  # Number of fixtures to skip
+        self.batch_size = batch  # Number of fixtures to crawl in one go
 
     def skip_elements(self, elements):
+        """
+        Cull the elements list based on skip attribute
+
+        :param elements: list of elements to be culled
+        :type elements:
+
+        :rtype:
+        """
         size = len(elements)
         skip = self.skip
 
@@ -30,8 +47,14 @@ class FixtureCrawler(object):
         return culled_elements
 
     def browse_monthly_fixtures(self):
+        """
+        Browses monthly fixture pages one by one
+        """
         try:
+            # Wait till links to match reports are active
             self.browser.wait_till_element_is_loaded("a[class='match-link match-report rc']", self.timeout)
+
+            # Find all links to match reports, cull them and browse them
             elements = self.browser.find_elements_by_css_selector("a[class='match-link match-report rc']")
             culled_elements = self.skip_elements(elements)
             self.browse_match_reports(culled_elements)
@@ -40,36 +63,57 @@ class FixtureCrawler(object):
             pass
 
         finally:
-            f.browse_previous_fixtures()
+            # Browse previous months and then quit
+            self.browse_previous_fixtures()
             self.browser.quit()
 
     def browse_previous_fixtures(self):
+        """
+        Browses fixtures from previous months recursively
+        """
+        # If batch size is zero that means all fixtures have been browsed, so return
         if self.batch_size == 0:
             return
 
+        # Wait till links to previous months are active
         self.browser.wait_till_element_is_loaded("span.ui-icon.ui-icon-triangle-1-w", self.timeout)
 
+        # Navigate to previous month
         elem = self.browser.find_element_by_css_selector("span.ui-icon.ui-icon-triangle-1-w")
         self.browser.click_element(elem)
 
+        # Wait till match report links are active
         self.browser.wait_till_element_is_loaded("a[class='match-link match-report rc']", self.timeout)
 
+        # Sleep for 5s
         time.sleep(5)
 
+        # Find all links to match reports, cull them and browse them
         elements = self.browser.find_elements_by_css_selector("a[class='match-link match-report rc']")
         culled_elements = self.skip_elements(elements)
         self.browse_match_reports(culled_elements)
 
+        # Check if month is August, if not browse previous month
         month = normalize(self.browser.find_element_by_css_selector("a[id='date-config-toggle-button']").text)
         if month != "Aug 2015":
             self.browse_previous_fixtures()
 
     def browse_match_reports(self, elements):
+        """
+        Browses match reports one by one
+
+        :param elements: list of elements which are links to match reports
+        :type elements:
+        """
+        # Get control key based on system platform
         CONTROL_KEY = get_control_key()
+
         for elem in elements:
+            # If batch size is zero that means all fixtures have been browsed, so return
             if self.batch_size == 0:
                 break
 
+            # Skip if required
             if self.skip != 0:
                 self.skip -= 1
                 continue
@@ -77,10 +121,10 @@ class FixtureCrawler(object):
             # Save the window opener (current window, do not mistaken with tab... not the same)
             main_window = self.browser.current_window_handle()
 
-            # Open the link in a new tab by sending key strokes on the element
-            # Use: Keys.CONTROL + Keys.SHIFT + Keys.RETURN to open tab on top of the stack
-            # first_link.send_keys(Keys.CONTROL + Keys.RETURN)
+            # Open match report in new tab
             self.browser.open_link_in_new_tab(elem)
+
+            # Sleep for 5s
             time.sleep(5)
 
             # Switch tab to the new tab, which we will assume is the next one on the right
@@ -89,7 +133,14 @@ class FixtureCrawler(object):
             # Put focus on current window which will, in fact, put focus on the current visible tab
             self.browser.switch_to_window(main_window)
 
-            # do whatever you have to do on this page, we will just got to sleep for now
+            # Check for forbidden access
+            server_response = normalize(self.browser.find_element_by_css_selector("div[id='header']").text)
+            print server_response
+            if server_response == "Server Error":
+                self.browser.quit()
+                raise ForbiddenAccessError
+
+            # Analyze the match report
             self.analyze_match_report()
 
             # Close current tab
@@ -98,9 +149,14 @@ class FixtureCrawler(object):
             # Put focus on current window which will be the window opener
             self.browser.switch_to_window(main_window)
 
+            # Decrement batch size
             self.batch_size -= 1
 
     def get_match_result(self):
+        """
+
+        :return:
+        """
         self.browser.wait_till_element_is_loaded("div[id='match-header']", self.timeout)
         match_header_elem = self.browser.find_element_by_css_selector("div[id='match-header']")
         team_elements = match_header_elem.find_elements_by_css_selector("td[class='team']")
@@ -114,6 +170,10 @@ class FixtureCrawler(object):
                 'away_goals': away_goals, 'kickoff': kickoff, 'date': date}
 
     def go_to_match_preview(self):
+        """
+
+        :return:
+        """
         self.browser.wait_till_element_is_loaded("div[id='sub-navigation']", self.timeout)
         div_elem = self.browser.find_element_by_css_selector("div[id='sub-navigation']")
         li_elem = div_elem.find_element_by_css_selector("li")
@@ -122,6 +182,10 @@ class FixtureCrawler(object):
         time.sleep(3)
 
     def get_height_stats(self):
+        """
+
+        :return:
+        """
         self.browser.wait_till_element_is_loaded("div[class='stat-group']", self.timeout)
         stat_group_elements = self.browser.find_elements_by_css_selector("div[class='stat-group']")
         stat_group_elem = stat_group_elements[1]
@@ -135,6 +199,10 @@ class FixtureCrawler(object):
                 'away_team_height': away_team_height}
 
     def analyze_match_report(self):
+        """
+
+        :return:
+        """
         self.go_to_match_preview()
         match_result = self.get_match_result()
         height_stats = self.get_height_stats()
@@ -146,18 +214,14 @@ class FixtureCrawler(object):
         self.match_reports['reports'].append(match_report)
     
     def persist_reports(self):
+        """
+
+        :return:
+        """
         try:
-            reports = load_as_json('data1.json')
+            reports = load_as_json('data2.json')
         except ValueError:
             reports = {'reports': []}
 
         reports['reports'].extend(self.match_reports['reports'])
-        dump_as_json(reports, 'data1.json', 'w')
-
-skip = 50
-batch = 10
-for i in range(15):
-    f = FixtureCrawler(FIXTURE_URL, skip, batch)
-    f.browse_monthly_fixtures()
-    f.persist_reports()
-    skip += 10
+        dump_as_json(reports, 'data2.json', 'w')
