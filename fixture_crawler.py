@@ -16,7 +16,6 @@ class FixtureCrawler(object):
 
         # Check for forbidden access
         server_response = normalize(self.browser.find_element_by_css_selector("div[id='header']").text)
-        print server_response
         if server_response == "Server Error":
             self.browser.quit()
             raise ForbiddenAccessError
@@ -135,7 +134,6 @@ class FixtureCrawler(object):
 
             # Check for forbidden access
             server_response = normalize(self.browser.find_element_by_css_selector("div[id='header']").text)
-            print server_response
             if server_response == "Server Error":
                 self.browser.quit()
                 raise ForbiddenAccessError
@@ -233,9 +231,9 @@ class FixtureCrawler(object):
         :return:
         """
         try:
-            reports = load_as_json('data2.json')
+            reports = load_as_json('data.json')
         except ValueError:
             reports = {'reports': []}
 
         reports['reports'].extend(self.match_reports['reports'])
-        dump_as_json(reports, 'data2.json', 'w')
+        dump_as_json(reports, 'data.json', 'w')

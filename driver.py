@@ -16,12 +16,11 @@ class Driver(object):
 
     def crawl_all_fixtures(self):
         try:
-            entries = load_as_json('data2.json')
+            entries = load_as_json('data.json')
         except ValueError:
             entries = {'reports': []}
 
         stored_entries = len(entries['reports'])
-        print stored_entries, self.required_entries
         while stored_entries < self.required_entries:
             skip = stored_entries
             batch = 10
