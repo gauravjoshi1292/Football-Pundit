@@ -11,6 +11,8 @@ from selenium import webdriver
 from selenium.webdriver.common.keys import Keys
 from selenium.common.exceptions import WebDriverException
 
+from urls import LEAGUE_TABLE_URL
+
 
 def system_platform():
     """
@@ -172,3 +174,19 @@ def load_as_json(json_file):
         data = json.load(infile, object_hook=json_util.object_hook)
 
     return data
+
+
+def get_all_teams():
+    return ['Arsenal', 'Aston Villa', 'Bournemouth', 'Chelsea', 'Crystal Palace',
+            'Everton', 'Leicester', 'Liverpool', 'Manchester United', 'Manchester City',
+            'Newcastle United', 'Norwich', 'Southampton', 'Stoke', 'Sunderland',
+            'Swansea', 'Tottenham', 'Watford', 'West Bromwich Albion', 'West Ham']
+
+
+def get_league_table():
+    driver = get_driver()
+    driver.get(LEAGUE_TABLE_URL)
+    print driver.page_source
+
+
+get_league_table()
