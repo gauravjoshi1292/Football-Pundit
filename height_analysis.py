@@ -47,6 +47,7 @@ def divide_matches_by_height(team, match_reports):
         away_team_height = match_report['away_team_height']
 
         if home_team == team:
+            print team, away_team
             if home_team_height < away_team_height:
                 matches_by_height['taller']['home'] += 1
                 matches_by_height['taller']['at_home_against'].append(away_team)
@@ -55,6 +56,7 @@ def divide_matches_by_height(team, match_reports):
                 matches_by_height['shorter']['at_home_against'].append(away_team)
 
         elif away_team == team:
+            print home_team, team
             if away_team_height < home_team_height:
                 matches_by_height['taller']['away'] += 1
                 matches_by_height['taller']['at_away_against'].append(home_team)
@@ -164,28 +166,93 @@ def divide_losses_by_height(team, match_reports):
     return losses_by_height
 
 
-def bake_home_games_data(data):
-    baked_data = {'against_taller_teams': {'top_five': 0, 'top_half': 0, 'bottom_half': 0, 'bottom_five': 0, 'teams': []},
-                  'against_shorter_teams': {'top_five': 0, 'top_half': 0, 'bottom_half': 0, 'bottom_five': 0, 'teams': []}}
+def get_home_away_info(data, league_table):
+    info = {'home': {'top_five': 0, 'top_half': 0, 'bottom_half': 0, 'bottom_five': 0, 'teams': []},
+            'away': {'top_five': 0, 'top_half': 0, 'bottom_half': 0, 'bottom_five': 0, 'teams': []}}
 
-    for item in data:
+    for team in data['at_home_against']:
+        pos = league_table[team]['pos']
+        info['home']['teams'].append(team)
+        if pos <= 5:
+            info['home']['top_five'] += 1
+            info['home']['top_half'] += 1
+        elif pos > 5 and pos <= 10:
+            info['home']['top_half'] += 1
+        elif pos > 10 and pos <= 15:
+            info['home']['top_half'] += 1
+        elif pos > 15 and pos <= 20:
+            info['home']['bottom_five'] += 1
+            info['home']['bottom_half'] += 1
+
+    for team in data['at_away_against']:
+        pos = league_table[team]['pos']
+        info['away']['teams'].append(team)
+        if pos <= 5:
+            info['away']['top_five'] += 1
+            info['away']['top_half'] += 1
+        elif pos > 5 and pos <= 10:
+            info['away']['top_half'] += 1
+        elif pos > 10 and pos <= 15:
+            info['away']['top_half'] += 1
+        elif pos > 15 and pos <= 20:
+            info['away']['bottom_five'] += 1
+            info['away']['bottom_half'] += 1
+
+    return info
 
 
+def bake_data(data, league_table):
+    baked_data = {'taller': {}, 'shorter': {}}
+    shorter_info = data['shorter']
+    taller_info = data['taller']
 
-def bake_data_for_each_team(match_reports):
+    baked_data['shorter'] = get_home_away_info(shorter_info, league_table)
+    baked_data['taller'] = get_home_away_info(taller_info, league_table)
+
+    return baked_data
+
+
+def bake_data_for_all_teams(match_reports, league_table):
+    baked_data = {}
+
     teams = get_all_teams()
     for team in teams:
-        matches_by_height = divide_matches_by_height(team, match_reports)
-        wins_by_height = divide_wins_by_height(team, match_reports)
-        draws_by_height = divide_draws_by_height(team, match_reports)
-        losses_by_height = divide_losses_by_height(team, match_reports)
+        team_data = {'matches': {}, 'wins': {}, 'draws': {}, 'losses': {}}
 
+        matches_by_height = divide_matches_by_height(team, match_reports)
+        print team, matches_by_height
+        team_data['matches'] = bake_data(matches_by_height, league_table)
+
+        wins_by_height = divide_wins_by_height(team, match_reports)
+        team_data['wins'] = bake_data(wins_by_height, league_table)
+
+        draws_by_height = divide_draws_by_height(team, match_reports)
+        team_data['draws'] = bake_data(draws_by_height, league_table)
+
+        losses_by_height = divide_losses_by_height(team, match_reports)
+        team_data['losses'] = bake_data(losses_by_height, league_table)
+
+        baked_data[team] = team_data
+
+    return baked_data
+
+
+def check_reports(reports):
+    a = list()
+    for r in reports:
+        if (r['home_team'], r['away_team']) in a:
+            print r['home_team'], r['away_team'], r['date']
+        else:
+            a.append((r['home_team'], r['away_team']))
 
 
 if __name__ == '__main__':
     reports = load_as_json('data.json')['reports']
-    does_height_affect_results(reports)
-    print divide_matches_by_height("Arsenal", reports)
-    print divide_wins_by_height('Arsenal', reports)
-    print divide_draws_by_height('Arsenal', reports)
-    print divide_losses_by_height('Arsenal', reports)
+    check_reports(reports)
+    # divide_matches_by_height('Arsenal', reports)
+    # league_table = load_as_json('league_table.json')
+    # baked_data = bake_data_for_all_teams(reports, league_table)
+    # print baked_data['Arsenal']['matches']
+    # print baked_data['Arsenal']['wins']
+    # print baked_data['Arsenal']['draws']
+    # print baked_data['Arsenal']['losses']

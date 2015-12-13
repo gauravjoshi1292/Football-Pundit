@@ -181,12 +181,3 @@ def get_all_teams():
             'Everton', 'Leicester', 'Liverpool', 'Manchester United', 'Manchester City',
             'Newcastle United', 'Norwich', 'Southampton', 'Stoke', 'Sunderland',
             'Swansea', 'Tottenham', 'Watford', 'West Bromwich Albion', 'West Ham']
-
-
-def get_league_table():
-    driver = get_driver()
-    driver.get(LEAGUE_TABLE_URL)
-    print driver.page_source
-
-
-get_league_table()

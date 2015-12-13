@@ -1,0 +1,222 @@
+{
+    "Southampton": {
+        "gf": 21, 
+        "gd": 2, 
+        "draws": 6, 
+        "ga": 19, 
+        "matches": 16, 
+        "wins": 5, 
+        "losses": 5, 
+        "pos": 12, 
+        "points": 21
+    }, 
+    "Manchester United": {
+        "gf": 21, 
+        "gd": 9, 
+        "draws": 5, 
+        "ga": 12, 
+        "matches": 16, 
+        "wins": 8, 
+        "losses": 3, 
+        "pos": 4, 
+        "points": 29
+    }, 
+    "Liverpool": {
+        "gf": 20, 
+        "gd": 1, 
+        "draws": 6, 
+        "ga": 19, 
+        "matches": 16, 
+        "wins": 6, 
+        "losses": 4, 
+        "pos": 9, 
+        "points": 24
+    }, 
+    "Norwich": {
+        "gf": 18, 
+        "gd": -10, 
+        "draws": 5, 
+        "ga": 28, 
+        "matches": 16, 
+        "wins": 3, 
+        "losses": 8, 
+        "pos": 18, 
+        "points": 14
+    }, 
+    "Leicester": {
+        "gf": 32, 
+        "gd": 11, 
+        "draws": 5, 
+        "ga": 21, 
+        "matches": 15, 
+        "wins": 9, 
+        "losses": 1, 
+        "pos": 3, 
+        "points": 32
+    }, 
+    "Aston Villa": {
+        "gf": 13, 
+        "gd": -17, 
+        "draws": 3, 
+        "ga": 30, 
+        "matches": 16, 
+        "wins": 1, 
+        "losses": 12, 
+        "pos": 20, 
+        "points": 6
+    }, 
+    "West Ham": {
+        "gf": 25, 
+        "gd": 4, 
+        "draws": 6, 
+        "ga": 21, 
+        "matches": 16, 
+        "wins": 6, 
+        "losses": 4, 
+        "pos": 8, 
+        "points": 24
+    }, 
+    "Manchester City": {
+        "gf": 32, 
+        "gd": 15, 
+        "draws": 2, 
+        "ga": 17, 
+        "matches": 16, 
+        "wins": 10, 
+        "losses": 4, 
+        "pos": 2, 
+        "points": 32
+    }, 
+    "Arsenal": {
+        "gf": 29, 
+        "gd": 16, 
+        "draws": 3, 
+        "ga": 13, 
+        "matches": 16, 
+        "wins": 10, 
+        "losses": 3, 
+        "pos": 1, 
+        "points": 33
+    }, 
+    "Bournemouth": {
+        "gf": 20, 
+        "gd": -11, 
+        "draws": 4, 
+        "ga": 31, 
+        "matches": 16, 
+        "wins": 4, 
+        "losses": 8, 
+        "pos": 14, 
+        "points": 16
+    }, 
+    "Crystal Palace": {
+        "gf": 21, 
+        "gd": 6, 
+        "draws": 2, 
+        "ga": 15, 
+        "matches": 16, 
+        "wins": 8, 
+        "losses": 6, 
+        "pos": 6, 
+        "points": 26
+    }, 
+    "West Bromwich Albion": {
+        "gf": 16, 
+        "gd": -5, 
+        "draws": 5, 
+        "ga": 21, 
+        "matches": 16, 
+        "wins": 5, 
+        "losses": 6, 
+        "pos": 13, 
+        "points": 20
+    }, 
+    "Sunderland": {
+        "gf": 17, 
+        "gd": -13, 
+        "draws": 3, 
+        "ga": 30, 
+        "matches": 16, 
+        "wins": 3, 
+        "losses": 10, 
+        "pos": 19, 
+        "points": 12
+    }, 
+    "Newcastle United": {
+        "gf": 18, 
+        "gd": -13, 
+        "draws": 4, 
+        "ga": 31, 
+        "matches": 16, 
+        "wins": 4, 
+        "losses": 8, 
+        "pos": 15, 
+        "points": 16
+    }, 
+    "Watford": {
+        "gf": 18, 
+        "gd": 2, 
+        "draws": 4, 
+        "ga": 16, 
+        "matches": 16, 
+        "wins": 7, 
+        "losses": 5, 
+        "pos": 7, 
+        "points": 25
+    }, 
+    "Everton": {
+        "gf": 29, 
+        "gd": 8, 
+        "draws": 8, 
+        "ga": 21, 
+        "matches": 16, 
+        "wins": 5, 
+        "losses": 3, 
+        "pos": 10, 
+        "points": 23
+    }, 
+    "Stoke": {
+        "gf": 13, 
+        "gd": -1, 
+        "draws": 5, 
+        "ga": 14, 
+        "matches": 16, 
+        "wins": 6, 
+        "losses": 5, 
+        "pos": 11, 
+        "points": 23
+    }, 
+    "Swansea": {
+        "gf": 15, 
+        "gd": -9, 
+        "draws": 5, 
+        "ga": 24, 
+        "matches": 16, 
+        "wins": 3, 
+        "losses": 8, 
+        "pos": 17, 
+        "points": 14
+    }, 
+    "Chelsea": {
+        "gf": 17, 
+        "gd": -7, 
+        "draws": 3, 
+        "ga": 24, 
+        "matches": 15, 
+        "wins": 4, 
+        "losses": 8, 
+        "pos": 16, 
+        "points": 15
+    }, 
+    "Tottenham": {
+        "gf": 26, 
+        "gd": 12, 
+        "draws": 8, 
+        "ga": 14, 
+        "matches": 16, 
+        "wins": 6, 
+        "losses": 2, 
+        "pos": 5, 
+        "points": 26
+    }
+}
