@@ -66,6 +66,8 @@ class FixtureCrawler(object):
             self.browse_previous_fixtures()
             self.browser.quit()
 
+        return self.match_reports
+
     def browse_previous_fixtures(self):
         """
         Browses fixtures from previous months recursively
@@ -224,16 +226,3 @@ class FixtureCrawler(object):
         match_report.update(height_stats)
 
         self.match_reports['reports'].append(match_report)
-    
-    def persist_reports(self):
-        """
-
-        :return:
-        """
-        try:
-            reports = load_as_json('data.json')
-        except ValueError:
-            reports = {'reports': []}
-
-        reports['reports'].extend(self.match_reports['reports'])
-        dump_as_json(reports, 'data.json', 'w')
