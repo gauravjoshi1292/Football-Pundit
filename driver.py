@@ -66,8 +66,14 @@ class Driver(object):
         :param reports:
         :return:
         """
-        print match_reports, len(match_reports)
-        valid_match_reports = [dict(t) for t in set([tuple(r.items()) for r in match_reports])]
+        valid_match_reports = []
+        checklist = []
+        for report in match_reports:
+            home_team, away_team = report['home_team'], report['away_team']
+            if (home_team, away_team) not in checklist:
+                checklist.append((home_team, away_team))
+                valid_match_reports.append(report)
+
         print valid_match_reports, len(valid_match_reports)
         valid_reports = {'reports': valid_match_reports}
 
@@ -76,6 +82,6 @@ class Driver(object):
 if __name__ == '__main__':
     driver = Driver(REQUIRED_ENTRIES)
     # driver.crawl_league_table()
-    driver.crawl_all_fixtures()
+    # driver.crawl_all_fixtures()
     # f = FixtureCrawler(FIXTURE_URL, 0, 0)
-    # driver.persist_reports({'reports': []})
+    driver.persist_reports({'reports': []})
