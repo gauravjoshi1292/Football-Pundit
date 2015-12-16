@@ -81,7 +81,7 @@ class Driver(object):
 
 if __name__ == '__main__':
     driver = Driver(REQUIRED_ENTRIES)
-    # driver.crawl_league_table()
-    # driver.crawl_all_fixtures()
+    driver.crawl_league_table()
+    driver.crawl_all_fixtures()
     # f = FixtureCrawler(FIXTURE_URL, 0, 0)
-    driver.persist_reports({'reports': []})
+    # driver.persist_reports({'reports': []})

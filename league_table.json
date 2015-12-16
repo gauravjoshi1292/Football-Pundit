@@ -44,15 +44,15 @@
         "points": 14
     }, 
     "Leicester": {
-        "gf": 32, 
-        "gd": 11, 
+        "gf": 34, 
+        "gd": 12, 
         "draws": 5, 
-        "ga": 21, 
-        "matches": 15, 
-        "wins": 9, 
+        "ga": 22, 
+        "matches": 16, 
+        "wins": 10, 
         "losses": 1, 
-        "pos": 3, 
-        "points": 32
+        "pos": 1, 
+        "points": 35
     }, 
     "Aston Villa": {
         "gf": 13, 
@@ -84,7 +84,7 @@
         "matches": 16, 
         "wins": 10, 
         "losses": 4, 
-        "pos": 2, 
+        "pos": 3, 
         "points": 32
     }, 
     "Arsenal": {
@@ -95,7 +95,7 @@
         "matches": 16, 
         "wins": 10, 
         "losses": 3, 
-        "pos": 1, 
+        "pos": 2, 
         "points": 33
     }, 
     "Bournemouth": {
@@ -198,13 +198,13 @@
         "points": 14
     }, 
     "Chelsea": {
-        "gf": 17, 
-        "gd": -7, 
+        "gf": 18, 
+        "gd": -8, 
         "draws": 3, 
-        "ga": 24, 
-        "matches": 15, 
+        "ga": 26, 
+        "matches": 16, 
         "wins": 4, 
-        "losses": 8, 
+        "losses": 9, 
         "pos": 16, 
         "points": 15
     }, 
