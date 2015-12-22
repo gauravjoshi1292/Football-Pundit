@@ -8,7 +8,7 @@ from urls import FIXTURE_URL, LEAGUE_TABLE_URL
 from league_table_crawler import LeagueTableCrawler
 
 
-REQUIRED_ENTRIES = 150
+REQUIRED_ENTRIES = 170
 
 
 class Driver(object):
@@ -22,10 +22,11 @@ class Driver(object):
             entries = {'reports': []}
 
         stored_entries = len(entries['reports'])
+        print stored_entries
         while stored_entries < self.required_entries:
             skip = stored_entries
             batch = 10
-            for i in range(16):
+            for i in range(3):
                 try:
                     crawler = FixtureCrawler(FIXTURE_URL, skip, batch)
                     new_reports = crawler.browse_monthly_fixtures()
@@ -50,7 +51,6 @@ class Driver(object):
 
         :return:
         """
-        print new_reports
         try:
             reports = load_as_json('data.json')
         except ValueError:
@@ -74,14 +74,29 @@ class Driver(object):
                 checklist.append((home_team, away_team))
                 valid_match_reports.append(report)
 
-        print valid_match_reports, len(valid_match_reports)
         valid_reports = {'reports': valid_match_reports}
 
         return valid_reports
 
 if __name__ == '__main__':
     driver = Driver(REQUIRED_ENTRIES)
-    driver.crawl_league_table()
+    # driver.crawl_league_table()
     driver.crawl_all_fixtures()
     # f = FixtureCrawler(FIXTURE_URL, 0, 0)
     # driver.persist_reports({'reports': []})
+
+    # data = load_as_json('data.json')
+    # teams = {}
+    # for i in data['reports']:
+    #     try:
+    #         teams[i['home_team']] += 1
+    #     except KeyError:
+    #         teams[i['home_team']] = 1
+    #
+    #     try:
+    #         teams[i['away_team']] += 1
+    #     except KeyError:
+    #         teams[i['away_team']] = 1
+    #
+    # print teams
+    # dump_as_json(new_data, 'data.json', 'w')
