@@ -294,6 +294,20 @@ def create_data_for_graphs():
     return graph_data
 
 
+def plot_graph(data_points):
+    from bokeh.charts import Bar, output_file, show
+
+    bar = Bar(data_points, label='team', values='val')
+    output_file('plot.html')
+    show(bar)
+
+
 if __name__ == '__main__':
     data = create_data_for_graphs()
-    print data
+
+    points = {}
+    for team, stats in data.items():
+        points['team'] = team
+        points['val'] = data[team]['taller']['away']
+
+    plot_graph(points)
