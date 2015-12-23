@@ -165,13 +165,13 @@ def divide_losses_by_height(team, match_reports):
 
 
 def get_home_away_info(data, league_table):
-    info = {'home': {'top_five': 0, 'top_half': 0, 'bottom_half': 0, 'bottom_five': 0, 'total': 0, 'teams': []},
-            'away': {'top_five': 0, 'top_half': 0, 'bottom_half': 0, 'bottom_five': 0, 'total': 0, 'teams': []}}
+    info = {'home': {'top_five': 0, 'top_half': 0, 'bottom_half': 0, 'bottom_five': 0, 'overall': 0, 'teams': []},
+            'away': {'top_five': 0, 'top_half': 0, 'bottom_half': 0, 'bottom_five': 0, 'overall': 0, 'teams': []}}
 
     for team in data['at_home_against']:
         pos = league_table[team]['pos']
         info['home']['teams'].append(team)
-        info['home']['total'] += 1
+        info['home']['overall'] += 1
         if pos <= 5:
             info['home']['top_five'] += 1
             info['home']['top_half'] += 1
@@ -186,7 +186,7 @@ def get_home_away_info(data, league_table):
     for team in data['at_away_against']:
         pos = league_table[team]['pos']
         info['away']['teams'].append(team)
-        info['away']['total'] += 1
+        info['away']['overall'] += 1
         if pos <= 5:
             info['away']['top_five'] += 1
             info['away']['top_half'] += 1
@@ -251,55 +251,49 @@ def percentage(val, total):
     return (val / (total * 1.0)) * 100.0
 
 
-def present_data(matches, wins, draws, losses):
-    print "\nOverall:"
-    print "Matches:", matches['total']
-    print "Wins:", wins['total'], "Percentage:", percentage(wins['total'], matches['total'])
-    print "Draws:", draws['total'], "Percentage:", percentage(draws['total'], matches['total'])
-    print "Losses:", losses['total'], "Percentage:", percentage(losses['total'], matches['total'])
+def process_data(matches, wins, draws, losses):
+    processed_data = dict()
 
-    print "\nAgainst top five:"
-    print "Matches:", matches['top_five']
-    print "Wins:", wins['top_five'], "Percentage:", percentage(wins['top_five'], matches['top_five'])
-    print "Draws:", draws['top_five'], "Percentage:", percentage(draws['top_five'], matches['top_five'])
-    print "Losses:", losses['top_five'], "Percentage:", percentage(losses['top_five'], matches['top_five'])
+    processed_data['matches'] = matches
+    processed_data['total_wins'] = wins
+    processed_data['win_percentage'] = percentage(wins, matches)
+    processed_data['total_draws'] = draws
+    processed_data['draw_percentage'] = percentage(draws, matches)
+    processed_data['total_losses'] = losses
+    processed_data['loss_percentage'] = percentage(losses, matches)
 
-    print "\nAgainst top half:"
-    print "Matches:", matches['top_half']
-    print "Wins:", wins['top_half'], "Percentage:", percentage(wins['top_half'], matches['top_half'])
-    print "Draws:", draws['top_half'], "Percentage:", percentage(draws['top_half'], matches['top_half'])
-    print "Losses:", losses['top_half'], "Percentage:", percentage(losses['top_half'], matches['top_half'])
-
-    print "\nAgainst bottom half:"
-    print "Matches:", matches['bottom_half']
-    print "Wins:", wins['bottom_half'], "Percentage:", percentage(wins['bottom_half'], matches['bottom_half'])
-    print "Draws:", draws['bottom_half'], "Percentage:", percentage(draws['bottom_half'], matches['bottom_half'])
-    print "Losses:", losses['bottom_half'], "Percentage:", percentage(losses['bottom_half'], matches['bottom_half'])
-
-    print "\nAgainst bottom five:"
-    print "Matches:", matches['bottom_five']
-    print "Wins:", wins['bottom_five'], "Percentage:", percentage(wins['bottom_five'], matches['bottom_five'])
-    print "Draws:", draws['bottom_five'], "Percentage:", percentage(draws['bottom_five'], matches['bottom_five'])
-    print "Losses:", losses['bottom_five'], "Percentage:", percentage(losses['bottom_five'], matches['bottom_five'])
+    return processed_data
 
 
-if __name__ == '__main__':
+def create_data_for_graphs():
     reports = load_as_json('data.json')['reports']
-    check_reports(reports)
-    # divide_matches_by_height('Arsenal', reports)
     league_table = load_as_json('league_table.json')
     baked_data = bake_data_for_all_teams(reports, league_table)
 
-    print "\nRecord against shorter teams:"
-    print "\nHome:"
-    team_data = baked_data['Arsenal']
-    present_data(team_data['matches']['shorter']['home'], team_data['wins']['shorter']['home'], team_data['draws']['shorter']['home'], team_data['losses']['shorter']['home'])
-    print "\nAway:"
-    present_data(team_data['matches']['shorter']['away'], team_data['wins']['shorter']['away'], team_data['draws']['shorter']['away'], team_data['losses']['shorter']['away'])
+    graph_data = {}
+    place_keys = ['home', 'away']
+    keys = ['overall', 'top_five', 'top_half', 'bottom_half', 'bottom_five']
+    for team, stats in baked_data.items():
+        graph_data[team] = {'shorter': {}, 'taller': {}}
+        for place in place_keys:
+            graph_data[team]['shorter'][place] = {}
+            graph_data[team]['taller'][place] = {}
+            for key in keys:
+                graph_data[team]['shorter'][place][key] = {}
+                graph_data[team]['shorter'][place][key] = process_data(stats['matches']['shorter'][place][key],
+                                                                       stats['wins']['shorter'][place][key],
+                                                                       stats['draws']['shorter'][place][key],
+                                                                       stats['losses']['shorter'][place][key])
 
-    print "\nRecord against taller teams:"
-    print "\nHome:"
-    team_data = baked_data['Arsenal']
-    present_data(team_data['matches']['taller']['home'], team_data['wins']['taller']['home'], team_data['draws']['taller']['home'], team_data['losses']['taller']['home'])
-    print "\nAway:"
-    present_data(team_data['matches']['taller']['away'], team_data['wins']['taller']['away'], team_data['draws']['taller']['away'], team_data['losses']['taller']['away'])
+                graph_data[team]['taller'][place][key] = {}
+                graph_data[team]['taller'][place][key] = process_data(stats['matches']['taller'][place][key],
+                                                                      stats['wins']['taller'][place][key],
+                                                                      stats['draws']['taller'][place][key],
+                                                                      stats['losses']['taller'][place][key])
+
+    return graph_data
+
+
+if __name__ == '__main__':
+    data = create_data_for_graphs()
+    print data
