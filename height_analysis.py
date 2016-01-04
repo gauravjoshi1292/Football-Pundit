@@ -1,5 +1,9 @@
 __author__ = 'gj1292'
 
+from bokeh.charts import Bar
+from bokeh.io import gridplot, output_file, show
+from bokeh.plotting import figure
+
 from utils import load_as_json, get_all_teams
 
 
@@ -265,7 +269,7 @@ def process_data(matches, wins, draws, losses):
     return processed_data
 
 
-def create_data_for_graphs():
+def bake_data_for_graphs():
     reports = load_as_json('data.json')['reports']
     league_table = load_as_json('league_table.json')
     baked_data = bake_data_for_all_teams(reports, league_table)
@@ -294,20 +298,42 @@ def create_data_for_graphs():
     return graph_data
 
 
+def plot_graph_against_shorter_teams(raw_data):
+    figures = []
+
+    # Home
+    plot_data = []
+    for team, stats in raw_data.items():
+        point = dict()
+        point['team'] = team
+        point['val'] = data[team]['shorter']['home']['overall']['win_percentage']
+        plot_data.append(point)
+    p = plot_graph(plot_data)
+    figures.append(p)
+
+    # Away
+    plot_data = []
+    for team, stats in raw_data.items():
+        point = dict()
+        point['team'] = team
+        point['val'] = data[team]['shorter']['away']['overall']['win_percentage']
+        plot_data.append(point)
+    p = plot_graph(plot_data)
+    figures.append(p)
+
+    return figures
+
 def plot_graph(data_points):
-    from bokeh.charts import Bar, output_file, show
+    # print data_points
 
-    bar = Bar(data_points, label='team', values='val')
-    output_file('plot.html')
-    show(bar)
-
+    bar = Bar(data_points, label='team', values='val', )
+    return bar
 
 if __name__ == '__main__':
-    data = create_data_for_graphs()
+    data = bake_data_for_graphs()
+    # print data
+    output_file('plot.html')
+    figures = plot_graph_against_shorter_teams(data)
 
-    points = {}
-    for team, stats in data.items():
-        points['team'] = team
-        points['val'] = data[team]['taller']['away']
-
-    plot_graph(points)
+    plot = gridplot([figures])
+    show(plot)
