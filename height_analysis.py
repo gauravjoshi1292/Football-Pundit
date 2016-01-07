@@ -1,8 +1,8 @@
 __author__ = 'gj1292'
 
-from bokeh.charts import Bar
-from bokeh.io import gridplot, output_file, show
+from bokeh.models import Range1d
 from bokeh.plotting import figure
+from bokeh.io import vplot, output_file, show
 
 from utils import load_as_json, get_all_teams
 
@@ -324,10 +324,16 @@ def plot_graph_against_shorter_teams(raw_data):
     return figures
 
 def plot_graph(data_points):
-    # print data_points
+    data_points.sort(key=lambda x: x['val'], reverse=True)
+    print data_points
+    order = range(1, 20)
+    x_vals = [i['team'] for i in data_points]
+    y_vals = [i['val'] for i in data_points]
+    yr = Range1d(0, max(y_vals) + 20)
+    f = figure(x_range=x_vals, y_range=yr, width=1500)
+    f.rect(x=order, y=[val/2.0 for val in y_vals], width=0.25, height=y_vals, color="#ff1200")
+    return f
 
-    bar = Bar(data_points, label='team', values='val', )
-    return bar
 
 if __name__ == '__main__':
     data = bake_data_for_graphs()
@@ -335,5 +341,6 @@ if __name__ == '__main__':
     output_file('plot.html')
     figures = plot_graph_against_shorter_teams(data)
 
-    plot = gridplot([figures])
+    print figures
+    plot = vplot(figures[0])
     show(plot)
