@@ -2,9 +2,9 @@ __author__ = 'gj1292'
 
 from bokeh.models import Range1d
 from bokeh.plotting import figure
-from bokeh.io import vplot, output_file, show
+from bokeh.io import gridplot, output_file, show
 
-from utils import load_as_json, get_all_teams
+from utils import load_as_json, get_all_teams, get_abbr_name
 
 
 def does_height_affect_results(match_reports):
@@ -298,39 +298,72 @@ def bake_data_for_graphs():
     return graph_data
 
 
-def plot_graph_against_shorter_teams(raw_data):
+def plot_graph_against_taller_teams(raw_data):
     figures = []
+    keys = ['overall', 'top_five', 'top_half', 'bottom_half', 'bottom_five']
 
     # Home
-    plot_data = []
-    for team, stats in raw_data.items():
-        point = dict()
-        point['team'] = team
-        point['val'] = data[team]['shorter']['home']['overall']['win_percentage']
-        plot_data.append(point)
-    p = plot_graph(plot_data)
-    figures.append(p)
+    for key in keys:
+        plot_data = []
+        for team, stats in raw_data.items():
+            point = dict()
+            point['team'] = team
+            point['val'] = data[team]['taller']['home'][key]['win_percentage']
+            plot_data.append(point)
+        p = plot_graph(plot_data, title='Against taller teams({0}, home)'.format(key))
+        figures.append(p)
 
     # Away
-    plot_data = []
-    for team, stats in raw_data.items():
-        point = dict()
-        point['team'] = team
-        point['val'] = data[team]['shorter']['away']['overall']['win_percentage']
-        plot_data.append(point)
-    p = plot_graph(plot_data)
-    figures.append(p)
+    for key in keys:
+        plot_data = []
+        for team, stats in raw_data.items():
+            point = dict()
+            point['team'] = team
+            point['val'] = data[team]['taller']['away'][key]['win_percentage']
+            plot_data.append(point)
+        p = plot_graph(plot_data, title='Against taller teams({0}, away)'.format(key))
+        figures.append(p)
 
     return figures
 
-def plot_graph(data_points):
+
+def plot_graph_against_shorter_teams(raw_data):
+    figures = []
+    keys = ['overall', 'top_five', 'top_half', 'bottom_half', 'bottom_five']
+
+    # Home
+    for key in keys:
+        plot_data = []
+        for team, stats in raw_data.items():
+            point = dict()
+            point['team'] = team
+            point['val'] = data[team]['shorter']['home'][key]['win_percentage']
+            plot_data.append(point)
+        p = plot_graph(plot_data, title='Against shorter teams({0}, home)'.format(key))
+        figures.append(p)
+
+    # Away
+    for key in keys:
+        plot_data = []
+        for team, stats in raw_data.items():
+            point = dict()
+            point['team'] = team
+            point['val'] = data[team]['shorter']['away'][key]['win_percentage']
+            plot_data.append(point)
+        p = plot_graph(plot_data, title='Against shorter teams({0}, away)'.format(key))
+        figures.append(p)
+
+    return figures
+
+
+def plot_graph(data_points, title):
     data_points.sort(key=lambda x: x['val'], reverse=True)
-    print data_points
+    # print data_points
     order = range(1, 20)
-    x_vals = [i['team'] for i in data_points]
+    x_vals = [get_abbr_name(i['team']) for i in data_points]
     y_vals = [i['val'] for i in data_points]
     yr = Range1d(0, max(y_vals) + 20)
-    f = figure(x_range=x_vals, y_range=yr, width=1500)
+    f = figure(x_range=x_vals, y_range=yr, width=800, title=title)
     f.rect(x=order, y=[val/2.0 for val in y_vals], width=0.25, height=y_vals, color="#ff1200")
     return f
 
@@ -340,7 +373,9 @@ if __name__ == '__main__':
     # print data
     output_file('plot.html')
     figures = plot_graph_against_shorter_teams(data)
+    figures.extend(plot_graph_against_taller_teams(data))
 
-    print figures
-    plot = vplot(figures[0])
+    # print figures
+    print [[figures[i], figures[i+1]] for i in range(0, len(figures), 2)]
+    plot = gridplot([[figures[i], figures[i+1]] for i in range(0, len(figures), 2)])
     show(plot)

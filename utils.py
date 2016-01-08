@@ -14,6 +14,22 @@ from selenium.common.exceptions import WebDriverException
 from urls import LEAGUE_TABLE_URL
 
 
+def get_abbr_name(team):
+    abbr_map = {'Arsenal': 'ARS', 'Aston Villa': 'AVL',
+                'Bournemouth': 'BOU', 'Chelsea': 'CHE',
+                'Crystal Palace': 'CRY', 'Everton': 'EVE',
+                'Leicester': 'LEI', 'Liverpool': 'LIV',
+                'Manchester United': 'MUN', 'Manchester City': 'MCI',
+                'Newcastle United': 'NEW', 'Norwich': 'NOR',
+                'Southampton': 'SOU', 'Stoke': 'STK',
+                'Sunderland': 'SUN', 'Swansea': 'SWA',
+                'Tottenham': 'TOT', 'Watford': 'WAT',
+                'West Bromwich Albion': 'WBA', 'West Ham': 'WHU'
+                }
+
+    return abbr_map[team]
+
+
 def system_platform():
     """
     Returns system platform
