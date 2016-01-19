@@ -8,12 +8,13 @@ from urls import FIXTURE_URL, LEAGUE_TABLE_URL
 from league_table_crawler import LeagueTableCrawler
 
 
-REQUIRED_ENTRIES = 170
+REQUIRED_ENTRIES = 220
 
 
 class Driver(object):
-    def __init__(self, required_entries):
+    def __init__(self, required_entries=0, skip=0):
         self.required_entries = required_entries
+        self.skip = skip
 
     def crawl_all_fixtures(self):
         try:
@@ -22,20 +23,19 @@ class Driver(object):
             entries = {'reports': []}
 
         stored_entries = len(entries['reports'])
-        print stored_entries
+        print "stored entries:", stored_entries
         while stored_entries < self.required_entries:
-            skip = stored_entries
-            batch = 10
-            for i in range(3):
-                try:
-                    crawler = FixtureCrawler(FIXTURE_URL, skip, batch)
-                    new_reports = crawler.browse_monthly_fixtures()
-                except ForbiddenAccessError:
-                    continue
+            batch = 2
+            try:
+                print "stored:", stored_entries, "req:", self.required_entries, "skip:", self.skip
+                crawler = FixtureCrawler(FIXTURE_URL, self.skip, batch)
+                new_reports = crawler.browse_monthly_fixtures()
+            except ForbiddenAccessError:
+                continue
 
-                self.persist_reports(new_reports)
-                skip += 10
-                stored_entries += 10
+            self.persist_reports(new_reports)
+            self.skip += 2
+            stored_entries += 2
 
     def crawl_league_table(self):
         crawler = LeagueTableCrawler(LEAGUE_TABLE_URL)
@@ -79,7 +79,7 @@ class Driver(object):
         return valid_reports
 
 if __name__ == '__main__':
-    driver = Driver(REQUIRED_ENTRIES)
+    driver = Driver(required_entries=REQUIRED_ENTRIES, skip=46)
     # driver.crawl_league_table()
     driver.crawl_all_fixtures()
     # f = FixtureCrawler(FIXTURE_URL, 0, 0)

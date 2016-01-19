@@ -55,9 +55,8 @@ class FixtureCrawler(object):
 
             # Find all links to match reports, cull them and browse them
             elements = self.browser.find_elements_by_css_selector("a[class='match-link match-report rc']")
-            print len(elements)
+            elements.reverse()
             culled_elements = self.skip_elements(elements)
-            print len(culled_elements)
             self.browse_match_reports(culled_elements)
 
         except TimeoutException:
@@ -93,6 +92,7 @@ class FixtureCrawler(object):
 
         # Find all links to match reports, cull them and browse them
         elements = self.browser.find_elements_by_css_selector("a[class='match-link match-report rc']")
+        elements.reverse()
         culled_elements = self.skip_elements(elements)
         self.browse_match_reports(culled_elements)
 
